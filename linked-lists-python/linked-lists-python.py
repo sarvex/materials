@@ -54,7 +54,7 @@ class LinkedList:
                 node.next = new_node
                 return
 
-        raise Exception("Node with data '%s' not found" % target_node_data)
+        raise Exception(f"Node with data '{target_node_data}' not found")
 
     def add_before(self, target_node_data, new_node):
         if self.head is None:
@@ -71,7 +71,7 @@ class LinkedList:
                 return
             prev_node = node
 
-        raise Exception("Node with data '%s' not found" % target_node_data)
+        raise Exception(f"Node with data '{target_node_data}' not found")
 
     def remove_node(self, target_node_data):
         if self.head is None:
@@ -88,4 +88,4 @@ class LinkedList:
                 return
             previous_node = node
 
-        raise Exception("Node with data '%s' not found" % target_node_data)
+        raise Exception(f"Node with data '{target_node_data}' not found")

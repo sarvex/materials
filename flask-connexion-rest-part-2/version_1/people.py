@@ -20,8 +20,7 @@ def read_all():
 
     # Serialize the data for the response
     person_schema = PersonSchema(many=True)
-    data = person_schema.dump(people)
-    return data
+    return person_schema.dump(people)
 
 
 def read_one(person_id):
@@ -40,10 +39,7 @@ def read_one(person_id):
 
         # Serialize the data for the response
         person_schema = PersonSchema()
-        data = person_schema.dump(person)
-        return data
-
-    # Otherwise, nope, didn't find that person
+        return person_schema.dump(person)
     else:
         abort(
             404,

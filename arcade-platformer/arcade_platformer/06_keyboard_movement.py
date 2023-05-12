@@ -251,9 +251,7 @@ class Platformer(arcade.Window):
         self.physics_engine.update()
 
         # Restrict user movement so they can't walk off screen
-        if self.player.left < 0:
-            self.player.left = 0
-
+        self.player.left = max(self.player.left, 0)
         # Check if we've picked up a coin
         coins_hit = arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.coins
@@ -269,12 +267,9 @@ class Platformer(arcade.Window):
             # Remove the coin
             coin.remove_from_sprite_lists()
 
-        # Now check if we're at the ending goal
-        goals_hit = arcade.check_for_collision_with_list(
+        if goals_hit := arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.goals
-        )
-
-        if goals_hit:
+        ):
             # Play the victory sound
             self.victory_sound.play()
 

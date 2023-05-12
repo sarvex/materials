@@ -267,9 +267,7 @@ class Platformer(arcade.Window):
         self.physics_engine.update()
 
         # Restrict user movement so they can't walk off screen
-        if self.player.left < 0:
-            self.player.left = 0
-
+        self.player.left = max(self.player.left, 0)
         # Check if we've picked up a coin
         coins_hit = arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.coins
@@ -285,12 +283,9 @@ class Platformer(arcade.Window):
             # Remove the coin
             coin.remove_from_sprite_lists()
 
-        # Now check if we're at the ending goal
-        goals_hit = arcade.check_for_collision_with_list(
+        if goals_hit := arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.goals
-        )
-
-        if goals_hit:
+        ):
             # Play the victory sound
             self.victory_sound.play()
 
@@ -311,9 +306,7 @@ class Platformer(arcade.Window):
         if self.player.left < left_boundary:
             self.view_left -= left_boundary - self.player.left
             # But don't scroll past the left edge of the map
-            if self.view_left < 0:
-                self.view_left = 0
-
+            self.view_left = max(self.view_left, 0)
         # Scroll right
         # Find the current right boundary
         right_boundary = self.view_left + SCREEN_WIDTH - RIGHT_VIEWPORT_MARGIN
@@ -322,9 +315,7 @@ class Platformer(arcade.Window):
         if self.player.right > right_boundary:
             self.view_left += self.player.right - right_boundary
             # Don't scroll past the right edge of the map
-            if self.view_left > self.map_width - SCREEN_WIDTH:
-                self.view_left = self.map_width - SCREEN_WIDTH
-
+            self.view_left = min(self.view_left, self.map_width - SCREEN_WIDTH)
         # Scroll up
         top_boundary = self.view_bottom + SCREEN_HEIGHT - TOP_VIEWPORT_MARGIN
         if self.player.top > top_boundary:

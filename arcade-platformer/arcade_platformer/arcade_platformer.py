@@ -400,10 +400,7 @@ class PlatformerView(arcade.View):
         self.view_left = 0
         self.view_bottom = 0
 
-        # Check if a joystick is connected
-        joysticks = arcade.get_joysticks()
-
-        if joysticks:
+        if joysticks := arcade.get_joysticks():
             # If so, get the first one
             self.joystick = joysticks[0]
             self.joystick.open()
@@ -615,34 +612,28 @@ class PlatformerView(arcade.View):
             else:
                 self.player.change_x = game.PLAYER_MOVE_SPEED
 
-        # Check if player can climb up or down
         elif key in [arcade.key.UP, arcade.key.I]:
             if self.view_mode:
                 self.view_bottom += 20
-            else:
-                if self.physics_engine.is_on_ladder():
-                    self.player.change_y = game.PLAYER_MOVE_SPEED
+            elif self.physics_engine.is_on_ladder():
+                self.player.change_y = game.PLAYER_MOVE_SPEED
         elif key in [arcade.key.DOWN, arcade.key.K]:
             if self.view_mode:
                 self.view_bottom -= 20
-            else:
-                if self.physics_engine.is_on_ladder():
-                    self.player.change_y = -game.PLAYER_MOVE_SPEED
+            elif self.physics_engine.is_on_ladder():
+                self.player.change_y = -game.PLAYER_MOVE_SPEED
 
-        # Check if we can jump
         elif key == arcade.key.SPACE:
             if self.physics_engine.can_jump():
                 self.player.change_y = game.PLAYER_JUMP_SPEED
                 # Play the jump sound
                 arcade.play_sound(self.jump_sound)
 
-        # Did the user want to pause?
         elif key == arcade.key.ESCAPE:
             # Pass the current view to preserve this view's state
             pause = PauseView(self)
             self.window.show_view(pause)
 
-        # Shortcut to end the game
         elif key == arcade.key.Q:
             # Show the game over screen
             gameover = GameOverView(self)
@@ -725,11 +716,10 @@ class PlatformerView(arcade.View):
                     self.player.change_y = 0
 
             # Did the user press the jump button?
-            if self.joystick.buttons[0]:
-                if self.physics_engine.can_jump():
-                    self.player.change_y = game.PLAYER_JUMP_SPEED
-                    # Play the jump sound
-                    arcade.play_sound(self.jump_sound)
+            if self.joystick.buttons[0] and self.physics_engine.can_jump():
+                self.player.change_y = game.PLAYER_JUMP_SPEED
+                # Play the jump sound
+                arcade.play_sound(self.jump_sound)
 
         # Update the player animation
         self.player.update_animation(delta_time)
@@ -751,9 +741,7 @@ class PlatformerView(arcade.View):
         self.physics_engine.update()
 
         # Restrict user movement so they can't walk off screen
-        if self.player.left < 0:
-            self.player.left = 0
-
+        self.player.left = max(self.player.left, 0)
         # Update the synchronized platforms
         for synch_group in self.synchronized_groups.values():
             # Find the master
@@ -782,21 +770,15 @@ class PlatformerView(arcade.View):
             # Remove the coin
             coin.remove_from_sprite_lists()
 
-        # Has Roz collided with an enemy?
-        enemies_hit = arcade.check_for_collision_with_list(
+        if enemies_hit := arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.enemies
-        )
-
-        if enemies_hit:
+        ):
             game_over = GameOverView(self)
             self.window.show_view(game_over)
 
-        # Now check if we're at the ending goal
-        goals_hit = arcade.check_for_collision_with_list(
+        if goals_hit := arcade.check_for_collision_with_list(
             sprite=self.player, sprite_list=self.goals
-        )
-
-        if goals_hit:
+        ):
             # Switch to the victory view
             victory_view = VictoryView(self, self.victory_sound)
             self.window.show_view(victory_view)
@@ -814,9 +796,7 @@ class PlatformerView(arcade.View):
         if self.player.left < left_boundary:
             self.view_left -= left_boundary - self.player.left
             # But don't scroll past the left edge of the map
-            if self.view_left < 0:
-                self.view_left = 0
-
+            self.view_left = max(self.view_left, 0)
         # Scroll right
         # Find the current right boundary
         right_boundary = (
@@ -827,9 +807,7 @@ class PlatformerView(arcade.View):
         if self.player.right > right_boundary:
             self.view_left += self.player.right - right_boundary
             # Don't scroll past the right edge of the map
-            if self.view_left > self.map_width - game.SCREEN_WIDTH:
-                self.view_left = self.map_width - game.SCREEN_WIDTH
-
+            self.view_left = min(self.view_left, self.map_width - game.SCREEN_WIDTH)
         # Scroll up
         top_boundary = (
             self.view_bottom + game.SCREEN_HEIGHT - game.TOP_VIEWPORT_MARGIN
